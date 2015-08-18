@@ -56,6 +56,10 @@ public class Vision extends Application {
 	
 	public static String userURL = "C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\Vision";
   
+	public static String printManagerPassword = "password01";
+	
+	public static String defaultURL = "C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\Vision\\vision.cfg";
+	
 	public static String url = "C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\Vision\\vision.cfg";
 	public static String log = "C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\Vision\\Log\\";
 	
@@ -201,7 +205,13 @@ public class Vision extends Application {
 			BufferedWriter file = new BufferedWriter(new FileWriter(userURL + "\\user.cfg"));
 			file.write("# User Configuration File for Vision.exe [Version " + VERSION + "] by Jordan Knott (TheNightWolf)\n");
 			file.write("# The path to the printer configuration file. The default name for this file is vision.cfg\n");
-			file.write("url:" + url + "\n"); 
+			if(isServerUsed)
+			{
+				file.write("url:" + "C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\Vision\\vision.cfg" + "\n"); 	
+				
+			} else {
+				file.write("url:" + url + "\n"); 
+			}
 			file.write("server:" + isServerUsed + "\n");
 			file.write("# This determines the look of Vision. 0 is the Modena stylesheet, while 1 is Caspian\n");
 			file.write("style:" + style + "\n");
@@ -288,21 +298,40 @@ public class Vision extends Application {
 				Stage pswDialog = new Stage();
 				pswDialog.initOwner(stage);
 				
+				GridPane gpane = new GridPane();
+				gpane.setAlignment(Pos.CENTER);
+				
+				gpane.add(new Label("Print Manager is locked!"), 0, 0);
+				
 				HBox hbox = new HBox();
 				Label passL = new Label("Password ");
 				TextField passF = new TextField();
 				hbox.getChildren().addAll(passL, passF);
 				
-				Scene scene = new Scene(hbox);
+				gpane.add(hbox, 0, 1);
+				
+				Scene scene = new Scene(gpane, 250, 150);
 				scene.setOnKeyReleased(new EventHandler<KeyEvent>(){
 
 					@Override
 					public void handle(KeyEvent event) {
 						if(event.getCode() == KeyCode.ENTER)
 						{
-							if(passF.getText().equals("password01"))
+							if(passF.getText().equals(printManagerPassword))
 							{
+								pswDialog.close();								
 								stage.setScene(generateConfigPane());
+								
+							}
+							else
+							{
+								GridPane gpane = new GridPane();
+								gpane.setAlignment(Pos.CENTER);
+								
+								gpane.add(new Label("Incorrect Password!"), 0, 0);
+								
+								Scene tScene = new Scene(gpane, 250, 150);
+								pswDialog.setScene(tScene);
 							}
 						}
 					}
@@ -341,9 +370,19 @@ public class Vision extends Application {
 				Stage dialog = new Stage();
 				dialog.initOwner(stage);
 				
+				GridPane core = new GridPane();
+				
+				Label curStatus = new Label("EAST Configuration Used: " + isServerUsed);
+				core.setAlignment(Pos.CENTER);
+				
+				core.add(curStatus, 0, 0);
+				
+				
 				HBox box = new HBox();
-				Label warning = new Label("Are you sure?");
-				Button yes = new Button("Yes");
+				box.setPadding(new Insets(15,0,0,0));
+				box.setSpacing(10);
+				Label warning = new Label("Would you like to...");
+				Button yes = new Button("Enable");
 				yes.setOnAction(new EventHandler<ActionEvent>(){
 
 					@Override
@@ -354,7 +393,10 @@ public class Vision extends Application {
 						Stage tmpDialog = new Stage();
 						tmpDialog.initOwner(stage);
 						
-						VBox vbox = new VBox();
+						GridPane pane = new GridPane();
+						pane.setVgap(15);
+						pane.setAlignment(Pos.CENTER);
+					
 						Label warning2 = new Label("Application needs to restart!");
 						Button ok = new Button("Okay");
 						ok.setOnAction(new EventHandler<ActionEvent>(){
@@ -366,25 +408,59 @@ public class Vision extends Application {
 							}
 							
 						});
-						vbox.getChildren().addAll(warning2, ok);
+						GridPane.setHalignment(warning2, HPos.CENTER);
+						GridPane.setHalignment(ok, HPos.CENTER);
 						
-						Scene tmpScene = new Scene(vbox);
+						pane.add(warning2, 0, 0);
+						pane.add(ok,0, 1);
+						
+						Scene tmpScene = new Scene(pane, 175, 125);
 						tmpDialog.setScene(tmpScene);
 						tmpDialog.show();
 					}
 					
 				});
-				Button no = new Button("No");
+				Button no = new Button("Disable");
 				no.setOnAction(new EventHandler<ActionEvent>(){
 
 					@Override
 					public void handle(ActionEvent arg0) {
+						Vision.isServerUsed = false;
 						dialog.close();
+						
+						Stage tmpDialog = new Stage();
+						tmpDialog.initOwner(stage);
+						
+						GridPane pane = new GridPane();
+						pane.setVgap(15);
+						pane.setAlignment(Pos.CENTER);
+					
+						Label warning2 = new Label("Application needs to restart!");
+						Button ok = new Button("Okay");
+						ok.setOnAction(new EventHandler<ActionEvent>(){
+
+							@Override
+							public void handle(ActionEvent arg0) {
+								Platform.exit();
+								System.exit(1);
+							}
+							
+						});
+						GridPane.setHalignment(warning2, HPos.CENTER);
+						GridPane.setHalignment(ok, HPos.CENTER);
+						
+						pane.add(warning2, 0, 0);
+						pane.add(ok,0, 1);
+						
+						Scene tmpScene = new Scene(pane, 175, 125);
+						tmpDialog.setScene(tmpScene);
+						tmpDialog.show();
 					}
 					
 				});
 				box.getChildren().addAll(warning, yes, no);
-				Scene scene = new Scene(box);
+				core.add(box, 0, 1);
+				Scene scene = new Scene(core, 250, 150);
 				dialog.setScene(scene);
 				dialog.show();
 				
@@ -650,7 +726,7 @@ public class Vision extends Application {
 				public void handle(ActionEvent event) {
 					Stage dialog = new Stage();
 					dialog.initOwner(stage);
-					
+					dialog.getIcons().add(new Image(Vision.class.getResource("/Vision.png").toString()));
 					HBox fields = new HBox();
 					Label nameL = new Label("(Warning: Children will be lost) Enter new name: ");
 					TextField nameF = new TextField();
@@ -702,7 +778,7 @@ public class Vision extends Application {
 				public void handle(ActionEvent event) {
 					Stage dialog = new Stage();
 					dialog.initOwner(stage);
-					
+					dialog.getIcons().add(new Image(Vision.class.getResource("/Vision.png").toString()));
 					VBox fields = new VBox();
 					fields.setAlignment(Pos.CENTER);
 					Label warning = new Label("Warning: All children will be lost");
@@ -788,7 +864,7 @@ public class Vision extends Application {
 					public void handle(ActionEvent arg0) {
 						Stage dialog = new Stage();
 						dialog.initOwner(stage);
-						
+						dialog.getIcons().add(new Image(Vision.class.getResource("/Vision.png").toString()));
 						GridPane fields = new GridPane();
 						fields.setHgap(10);
 						fields.setVgap(10);
@@ -881,7 +957,7 @@ public class Vision extends Application {
 					public void handle(ActionEvent event) {
 						Stage dialog = new Stage();
 						dialog.initOwner(stage);
-						
+						dialog.getIcons().add(new Image(Vision.class.getResource("/Vision.png").toString()));
 						VBox fields = new VBox();
 						fields.setAlignment(Pos.CENTER);
 						Label warning = new Label("Warning: All children will be lost");
@@ -937,7 +1013,7 @@ public class Vision extends Application {
 			public void handle(ActionEvent arg0) {
 				Stage dialog = new Stage();
 				dialog.initOwner(stage);
-				
+				dialog.getIcons().add(new Image(Vision.class.getResource("/Vision.png").toString()));
 				HBox fields = new HBox();
 				fields.setAlignment(Pos.CENTER);
 				Label nameL = new Label("Enter name: ");
@@ -986,7 +1062,7 @@ public class Vision extends Application {
 			public void handle(ActionEvent arg0) {
 				Stage dialog = new Stage();
 				dialog.initOwner(stage);
-				
+				dialog.getIcons().add(new Image(Vision.class.getResource("/Vision.png").toString()));
 				GridPane fields = new GridPane();
 				fields.setVgap(10);
 				fields.setHgap(10);
@@ -1094,5 +1170,25 @@ public class Vision extends Application {
 		JOptionPane.showMessageDialog(null, message);
 	}
 	
+	public void dialogBoxFX(String message)
+	{
+		Stage dialogBox = new Stage();
+		dialogBox.initOwner(stage);
+		dialogBox.getIcons().add(new Image(Vision.class.getResource("/Vision.png").toString()));
+		GridPane core = new GridPane();
+		core.setAlignment(Pos.CENTER);
+		core.add(new Label(message), 0, 0);
+		Button button = new Button("Okay");
+		button.setOnAction(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				dialogBox.close();
+			}
+			
+		});
+		core.add(button, 1, 0);
+		dialogBox.show();
+	}
 		
 }
