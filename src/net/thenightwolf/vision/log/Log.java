@@ -24,6 +24,8 @@ public class Log {
 			}
 
 		}else {
+			System.out.println("else");
+			new File("C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\Vision\\").mkdir();
 			new File(Vision.log).mkdir();
 			try {
 				log_file = new PrintWriter(Vision.log + "Log-Report " + getTimeStamp() + ".txt", "UTF-8");

@@ -61,7 +61,7 @@ public class Vision extends Application {
 	
 	public static final String EAST_SERVER = "C:\\SERVER";
 	
-	public static String serverURL = "";
+	public static String serverURL = "C:\\SERVER\\Vision\\server.cfg";
 	
 	//0 = Modena 1 = Caspian
 	public static int style = 1;
@@ -154,6 +154,7 @@ public class Vision extends Application {
 						style = Integer.parseInt(parts[1]);
 					}else if(parts[0].equals("server")){
 						isServerUsed = Boolean.parseBoolean(parts[1]);
+						url = serverURL;
 					}
 				
 					
@@ -177,7 +178,7 @@ public class Vision extends Application {
 					file.write("# User Configuration File for Vision.exe [Version " + VERSION + "] by Jordan Knott (TheNightWolf)\n");
 					file.write("# The path to the printer configuration file. The default name for this file is vision.cfg\n");
 					file.write("url:" + url + "\n"); 
-					file.write("server:" + true);
+					file.write("server:" + true + "\n");
 					file.write("# This determines the look of Vision. 0 is the Modena stylesheet, while 1 is Caspian\n");
 					file.write("style:" + style + "\n");
 					
@@ -201,7 +202,7 @@ public class Vision extends Application {
 			file.write("# User Configuration File for Vision.exe [Version " + VERSION + "] by Jordan Knott (TheNightWolf)\n");
 			file.write("# The path to the printer configuration file. The default name for this file is vision.cfg\n");
 			file.write("url:" + url + "\n"); 
-			file.write("server:" + isServerUsed);
+			file.write("server:" + isServerUsed + "\n");
 			file.write("# This determines the look of Vision. 0 is the Modena stylesheet, while 1 is Caspian\n");
 			file.write("style:" + style + "\n");
 			file.close();
@@ -299,7 +300,10 @@ public class Vision extends Application {
 					public void handle(KeyEvent event) {
 						if(event.getCode() == KeyCode.ENTER)
 						{
-							
+							if(passF.getText().equals("password01"))
+							{
+								stage.setScene(generateConfigPane());
+							}
 						}
 					}
 					
@@ -330,7 +334,63 @@ public class Vision extends Application {
 		Menu server = new Menu("Server");
 		
 		MenuItem east = new MenuItem("EAST Setup");
-		
+		east.setOnAction(new EventHandler<ActionEvent>(){
+
+			@Override
+			public void handle(ActionEvent arg0) {
+				Stage dialog = new Stage();
+				dialog.initOwner(stage);
+				
+				HBox box = new HBox();
+				Label warning = new Label("Are you sure?");
+				Button yes = new Button("Yes");
+				yes.setOnAction(new EventHandler<ActionEvent>(){
+
+					@Override
+					public void handle(ActionEvent arg0) {
+						Vision.isServerUsed = true;
+						dialog.close();
+						
+						Stage tmpDialog = new Stage();
+						tmpDialog.initOwner(stage);
+						
+						VBox vbox = new VBox();
+						Label warning2 = new Label("Application needs to restart!");
+						Button ok = new Button("Okay");
+						ok.setOnAction(new EventHandler<ActionEvent>(){
+
+							@Override
+							public void handle(ActionEvent arg0) {
+								Platform.exit();
+								System.exit(1);
+							}
+							
+						});
+						vbox.getChildren().addAll(warning2, ok);
+						
+						Scene tmpScene = new Scene(vbox);
+						tmpDialog.setScene(tmpScene);
+						tmpDialog.show();
+					}
+					
+				});
+				Button no = new Button("No");
+				no.setOnAction(new EventHandler<ActionEvent>(){
+
+					@Override
+					public void handle(ActionEvent arg0) {
+						dialog.close();
+					}
+					
+				});
+				box.getChildren().addAll(warning, yes, no);
+				Scene scene = new Scene(box);
+				dialog.setScene(scene);
+				dialog.show();
+				
+			}
+			
+		});
 		MenuItem manage = new MenuItem("Manage");
 		
 		
